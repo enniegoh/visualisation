@@ -1,0 +1,1041 @@
+---
+title: "The Analysis of Layoffs and Bankruptcy in 2020 to 2023"
+output:
+  flexdashboard::flex_dashboard:
+    storyboard: yes
+runtime: shiny
+---
+
+```{r setup, include = F}
+library(flexdashboard)
+knitr::opts_chunk$set(echo = F, warning = F)
+```
+
+
+
+```{r, include = F, cache = T, echo = F}
+full_data <- read.csv("layoffs_data.csv", header = T, encoding = "UTF-8", strip.white = T)
+summary(full_data)
+cleaned_data <- subset(full_data, select = -c(Source, Date_Added, List_of_Employees_Laid_Off))
+missing_layoff <- cleaned_data[is.na(cleaned_data$Laid_Off_Count),]
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Retool" & cleaned_data$Date == "2023-06-22"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Friday Health Plans" & cleaned_data$Date == "2023-06-21"] <- 322
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Binance.US" & cleaned_data$Date == "2023-06-15"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "FrontRow" & cleaned_data$Date == "2023-06-15"] <- 315
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Synapse" & cleaned_data$Date == "2023-06-14"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "GoCardless" & cleaned_data$Date == "2023-06-12"] <- 135
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "HashiCorp" & cleaned_data$Date == "2023-06-07"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ursa Major" & cleaned_data$Date == "2023-06-07"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Azibo" & cleaned_data$Date == "2023-06-05"] <- 8
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Meati Foods" & cleaned_data$Date == "2023-06-03"] <- 15
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CloudTrucks" & cleaned_data$Date == "2023-06-01"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CoachHub" & cleaned_data$Date == "2023-06-01"] <- 133
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SentinelOne" & cleaned_data$Date == "2023-06-01"] <- 105
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nansen" & cleaned_data$Date == "2023-05-30"] <- 47
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Kabam" & cleaned_data$Date == "2023-05-25"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Alibaba Cloud" & cleaned_data$Date == "2023-05-24"] <- 1000
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Brainly" & cleaned_data$Date == "2023-05-24"] <- 120
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SoundCloud" & cleaned_data$Date == "2023-05-23"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Paperless Parts" & cleaned_data$Date == "2023-05-22"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "dbt Labs" & cleaned_data$Date == "2023-05-18"] <- 66
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nextbite" & cleaned_data$Date == "2023-05-18"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "TuSimple" & cleaned_data$Date == "2023-05-18"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Formstack" & cleaned_data$Date == "2023-05-17"] <- 125
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Everlaw" & cleaned_data$Date == "2023-05-12"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CS Disco" & cleaned_data$Date == "2023-05-11"] <- 47
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Marqeta" & cleaned_data$Date == "2023-05-09"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Glassbox" & cleaned_data$Date == "2023-05-04"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Brightcove" & cleaned_data$Date == "2023-05-03"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Brightline" & cleaned_data$Date == "2023-05-03"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Clubhouse" & cleaned_data$Date == "2023-04-27"] <- 110
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Oddle" & cleaned_data$Date == "2023-04-27"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "FamPay" & cleaned_data$Date == "2023-04-17"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Calibrate" & cleaned_data$Date == "2023-04-14"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mediafly" & cleaned_data$Date == "2023-04-13"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Euler Motors" & cleaned_data$Date == "2023-04-11"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Reforge" & cleaned_data$Date == "2023-04-11"] <- 45
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Cin7" & cleaned_data$Date == "2023-04-04"] <- 42
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Marqeta" & cleaned_data$Date == "2023-05-09"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Glassbox" & cleaned_data$Date == "2023-05-04"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Brightcove" & cleaned_data$Date == "2023-05-03"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Airbyte" & cleaned_data$Date == "2023-03-31"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Kyndryl" & cleaned_data$Date == "2023-03-30"] <- 2000
+cleaned_data$Date[cleaned_data$Company == "Kyndryl"] <- "2023-04-14"
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Unacademy" & cleaned_data$Date == "2023-03-30"] <- 380
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "OnePipe" & cleaned_data$Date == "2023-03-29"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Shift" & cleaned_data$Date == "2023-03-29"] <- 165
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Better Therapeutics" & cleaned_data$Date == "2023-03-27"] <- 15
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rewind" & cleaned_data$Date == "2023-03-22"] <- 37
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Roofstock" & cleaned_data$Date == "2023-03-22"] <- 108
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Expedia" & cleaned_data$Date == "2023-03-21"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "GAMURS Group" & cleaned_data$Date == "2023-03-21"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Laybuy" & cleaned_data$Date == "2023-03-21"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Huuuge Games" & cleaned_data$Date == "2023-03-20"] <- 59
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Bonusly" & cleaned_data$Date == "2023-03-16"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Hometap" & cleaned_data$Date == "2023-03-15"] <- 60
+cleaned_data <- subset(cleaned_data, !(Company == "Bonusly" & Date == "2023-03-09"))
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Appcues" & cleaned_data$Date == "2023-03-08"] <- 16
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Indigo" & cleaned_data$Date == "2023-03-03"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Orchard" & cleaned_data$Date == "2023-03-02"] <- 130
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Protego Trust Bank" & cleaned_data$Date == "2023-03-01"] <- 55
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "EQRx" & cleaned_data$Date == "2023-02-24"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Poshmark" & cleaned_data$Date == "2023-02-24"] <- 16
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Dapper Labs" & cleaned_data$Date == "2023-02-23"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Messari" & cleaned_data$Date == "2023-02-23"] <- 26
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vibrent Health" & cleaned_data$Date == "2023-02-23"] <- 30
+cleaned_data$Percentage[cleaned_data$Company == "Arch Oncology" & cleaned_data$Date == "2023-02-24"] <- 1.00
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Criteo" & cleaned_data$Date == "2023-02-21"] <- 250
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "PeerStreet" & cleaned_data$Date == "2023-02-21"] <- 43
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zalando" & cleaned_data$Date == "2023-02-21"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Milkrun" & cleaned_data$Date == "2023-02-15"] <- 36
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Tackle" & cleaned_data$Date == "2023-02-15"] <- 48
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vicarious Surgical" & cleaned_data$Date == "2023-02-15"] <- 23
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "HackerEarth" & cleaned_data$Date == "2023-02-14"] <- 17
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "PhableCare" & cleaned_data$Date == "2023-02-14"] <- 560
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Udemy" & cleaned_data$Date == "2023-02-14"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Casavo" & cleaned_data$Date == "2023-02-13"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Foodpanda" & cleaned_data$Date == "2023-02-13"] <- 1000
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Getir" & cleaned_data$Date == "2023-02-13"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rigetti Computing" & cleaned_data$Date == "2023-02-10"] <- 45
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Wonderschool" & cleaned_data$Date == "2023-02-10"] <- 6
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "GitHub" & cleaned_data$Date == "2023-02-09"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Baraja" & cleaned_data$Date == "2023-02-08"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Koho" & cleaned_data$Date == "2023-02-08"] <- 42
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sana Benefits" & cleaned_data$Date == "2023-02-07"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "C6 Bank" & cleaned_data$Date == "2023-02-06"] <- 500
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "MariaDB" & cleaned_data$Date == "2023-02-01"] <- 35
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Match Group" & cleaned_data$Date == "2023-02-01"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rivian" & cleaned_data$Date == "2023-02-01"] <- 840
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ada" & cleaned_data$Date == "2023-02-01"] <- 140
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "OpenText" & cleaned_data$Date == "2023-01-30"] <- 2000
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "BM Technologies" & cleaned_data$Date == "2023-01-30"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Prime Trust" & cleaned_data$Date == "2023-01-30"] <- 99
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Quantum SI" & cleaned_data$Date == "2023-01-30"] <- 18
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SoFi" & cleaned_data$Date == "2023-01-30"] <- 65
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Decent" & cleaned_data$Date == "2023-01-27"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Plus One Robotics" & cleaned_data$Date == "2023-01-27"] <- 7
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Finastra" & cleaned_data$Date == "2023-01-25"] <- 370
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Noom" & cleaned_data$Date == "2023-01-25"] <- 135
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "PagSeguro" & cleaned_data$Date == "2023-01-25"] <- 500
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Prosus" & cleaned_data$Date == "2023-01-25"] <- 9000
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CoachHub" & cleaned_data$Date == "2023-01-24"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Corvus Insurance" & cleaned_data$Date == "2023-01-24"] <- 38
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "PagerDuty" & cleaned_data$Date == "2023-01-24"] <- 67
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Scoro" & cleaned_data$Date == "2023-01-24"] <- 14
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Camp K12" & cleaned_data$Date == "2023-01-23"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Gemini" & cleaned_data$Date == "2023-01-23"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Yext" & cleaned_data$Date == "2023-01-23"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Avalara" & cleaned_data$Date == "2023-01-20"] <- 230
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Cyteir Therapeutics" & cleaned_data$Date == "2023-01-20"] <- 35
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Morning Consult" & cleaned_data$Date == "2023-01-20"] <- 47
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zappos" & cleaned_data$Date == "2023-01-20"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Fandom" & cleaned_data$Date == "2023-01-19"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "IAM Robotics" & cleaned_data$Date == "2023-01-19"] <- 65
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Icertis" & cleaned_data$Date == "2023-01-19"] <- 120
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Personalis" & cleaned_data$Date == "2023-01-19"] <- 114
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Prisma" & cleaned_data$Date == "2023-01-19"] <- 45
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Wallbox" & cleaned_data$Date == "2023-01-19"] <- 153
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Bally's Interactive" & cleaned_data$Date == "2023-01-18"] <- 15
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Betterfly" & cleaned_data$Date == "2023-01-18"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Coda" & cleaned_data$Date == "2023-01-18"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Redbubble" & cleaned_data$Date == "2023-01-18"] <- 280
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "GoMechanic" & cleaned_data$Date == "2023-01-17"] <- 770
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Oracle" & cleaned_data$Date == "2023-01-17"] <- 184
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "RateGenius" & cleaned_data$Date == "2023-01-17"] <- 139
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "XP" & cleaned_data$Date == "2023-01-17"] <- 700
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Dunzo" & cleaned_data$Date == "2023-01-16"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ignition" & cleaned_data$Date == "2023-01-16"] <- 16
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rebel Foods" & cleaned_data$Date == "2023-01-16"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "DeHaat" & cleaned_data$Date == "2023-01-15"] <- 500
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "GoCanvas" & cleaned_data$Date == "2023-01-13"] <- 41
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Jellyfish" & cleaned_data$Date == "2023-01-13"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Crypto.com" & cleaned_data$Date == "2023-01-12"] <- 800
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Lattice" & cleaned_data$Date == "2023-01-12"] <- 105
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Life360" & cleaned_data$Date == "2023-01-12"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rock Content" & cleaned_data$Date == "2023-01-12"] <- 139
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Carta" & cleaned_data$Date == "2023-01-11"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Limeade" & cleaned_data$Date == "2023-01-11"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Oyster" & cleaned_data$Date == "2023-01-11"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Paddle" & cleaned_data$Date == "2023-01-11"] <- 8
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "100 Thieves" & cleaned_data$Date == "2023-01-10"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Beamery" & cleaned_data$Date == "2023-01-10"] <- 54
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Citrix" & cleaned_data$Date == "2023-01-160"] <- 2250
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Esper" & cleaned_data$Date == "2023-01-10"] <- 55
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "WHOOP" & cleaned_data$Date == "2023-01-10"] <- 24
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Editas Medicine" & cleaned_data$Date == "2023-01-09"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Scale AI" & cleaned_data$Date == "2023-01-09"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Aware" & cleaned_data$Date == "2023-01-06"] <- 26
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CreateMe" & cleaned_data$Date == "2023-01-06"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mojo Vision" & cleaned_data$Date == "2023-01-06"] <- 113
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SuperRare" & cleaned_data$Date == "2023-01-06"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Attentive" & cleaned_data$Date == "2023-01-05"] <- 195
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Compass" & cleaned_data$Date == "2023-01-05"] <- 350
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "TCR2" & cleaned_data$Date == "2023-01-05"] <- 42
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vimeo" & cleaned_data$Date == "2023-01-04"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Wyre" & cleaned_data$Date == "2023-01-04"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Octopus Network" & cleaned_data$Date == "2022-12-27"] <- 12
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Esper" & cleaned_data$Date == "2022-12-27"] <- 55
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "WHOOP" & cleaned_data$Date == "2022-12-27"] <- 24
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Editas Medicine" & cleaned_data$Date == "2022-12-27"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Scale AI" & cleaned_data$Date == "2022-12-27"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Aware" & cleaned_data$Date == "2022-12-27"] <- 26
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CreateMe" & cleaned_data$Date == "2022-12-27"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mojo Vision" & cleaned_data$Date == "2022-12-27"] <- 113
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SuperRare" & cleaned_data$Date == "2022-12-27"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Attentive" & cleaned_data$Date == "2022-12-27"] <- 195
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Xiaomi" & cleaned_data$Date == "2022-12-19"] <- 900
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "FreshBooks" & cleaned_data$Date == "2022-12-16"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Improbable" & cleaned_data$Date == "2022-12-16"] <- 95
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SonderMind" & cleaned_data$Date == "2022-12-16"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Apollo" & cleaned_data$Date == "2022-12-15"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Landing" & cleaned_data$Date == "2022-12-14"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "TaxBit" & cleaned_data$Date == "2022-12-13"] <- 36
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Caribou" & cleaned_data$Date == "2022-12-12"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Autobooks" & cleaned_data$Date == "2022-12-10"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Convene" & cleaned_data$Date == "2022-12-10"] <- 54
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "PharmEasy" & cleaned_data$Date == "2022-12-10"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Brodmann17" & cleaned_data$Date == "2022-12-09"] <- 35
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "N-able Technologies" & cleaned_data$Date == "2022-12-09"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "ZenLedger" & cleaned_data$Date == "2022-12-09"] <- 5
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Bakkt" & cleaned_data$Date == "2022-12-08"] <- 87
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Blue Apron" & cleaned_data$Date == "2022-12-08"] <- 169
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nerdy" & cleaned_data$Date == "2022-12-08"] <- 170
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vanta" & cleaned_data$Date == "2022-12-08"] <- 53
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CircleCI" & cleaned_data$Date == "2022-12-07"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nextiva" & cleaned_data$Date == "2022-12-06"] <- 238
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "OneStudyTeam" & cleaned_data$Date == "2022-12-06"] <- 160
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zuora" & cleaned_data$Date == "2022-12-06"] <- 185
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Elemy" & cleaned_data$Date == "2022-12-05"] <- 38
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Route" & cleaned_data$Date == "2022-12-05"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Thinkific" & cleaned_data$Date == "2022-12-05"] <- 76
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Bybit" & cleaned_data$Date == "2022-12-03"] <- 600
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Podium" & cleaned_data$Date == "2022-12-01"] <- 144
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Strava" & cleaned_data$Date == "2022-12-01"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Synlogic" & cleaned_data$Date == "2022-12-01"] <- 21
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Elastic" & cleaned_data$Date == "2022-11-30"] <- 450
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sana" & cleaned_data$Date == "2022-11-30"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Venafi" & cleaned_data$Date == "2022-11-30"] <- 68
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Codexis" & cleaned_data$Date == "2022-11-29"] <- 59
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Firework" & cleaned_data$Date == "2022-11-29"] <- 45
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "MessageBird" & cleaned_data$Date == "2022-11-29"] <- 186
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Plerk" & cleaned_data$Date == "2022-11-29"] <- 38
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Inspectify" & cleaned_data$Date == "2022-11-28"] <- 16
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "NCX" & cleaned_data$Date == "2022-11-28"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zilch" & cleaned_data$Date == "2022-11-26"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SWVL" & cleaned_data$Date == "2022-11-23"] <- 450
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Natera" & cleaned_data$Date == "2022-11-22"] <- 58
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rapyd" & cleaned_data$Date == "2022-11-22"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Devo" & cleaned_data$Date == "2022-11-21"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Capitolis" & cleaned_data$Date == "2022-11-18"] <- 37
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Unchained Capital" & cleaned_data$Date == "2022-11-18"] <- 13
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Morning Brew" & cleaned_data$Date == "2022-11-17"] <- 48
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Symend" & cleaned_data$Date == "2022-11-17"] <- 35
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "D2L" & cleaned_data$Date == "2022-11-16"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Homeward" & cleaned_data$Date == "2022-11-16"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Hopin" & cleaned_data$Date == "2022-11-16"] <- 120
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Apollo Insurance" & cleaned_data$Date == "2022-11-15"] <- 125
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Oatly" & cleaned_data$Date == "2022-11-15"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "OfferUp" & cleaned_data$Date == "2022-11-15"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Outside" & cleaned_data$Date == "2022-11-15"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rubicon Technologies" & cleaned_data$Date == "2022-11-15"] <- 55
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Tencent" & cleaned_data$Date == "2022-11-15"] <- 1879
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Typeform" & cleaned_data$Date == "2022-11-15"] <- 53
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Whispir" & cleaned_data$Date == "2022-11-15"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Shopee" & cleaned_data$Date == "2022-11-14"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Reforge" & cleaned_data$Date == "2022-11-10"] <- 36
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SendCloud" & cleaned_data$Date == "2022-11-10"] <- 50
+cleaned_data$Percentage[cleaned_data$Company == "Voly" & cleaned_data$Date == "2022-11-10"] <- 1.00
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "ZenBusiness" & cleaned_data$Date == "2022-11-10"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Amobee" & cleaned_data$Date == "2022-11-09"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Coursera" & cleaned_data$Date == "2022-11-09"] <- 32
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "RingCentral" & cleaned_data$Date == "2022-11-09"] <- 530
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Spotify" & cleaned_data$Date == "2022-11-09"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Astra" & cleaned_data$Date == "2022-11-08"] <- 60
+cleaned_data$Percentage[cleaned_data$Company == "Beat" & cleaned_data$Date == "2022-11-08"] <- 1.00
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SADA" & cleaned_data$Date == "2022-11-08"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Code42" & cleaned_data$Date == "2022-11-07"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Practically" & cleaned_data$Date == "2022-11-06"] <- 190
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Benitago Group" & cleaned_data$Date == "2022-11-04"] <- 9
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mythical Games" & cleaned_data$Date == "2022-11-04"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "LiveRamp" & cleaned_data$Date == "2022-11-03"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Provi" & cleaned_data$Date == "2022-11-03"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rubius" & cleaned_data$Date == "2022-11-03"] <- 42
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Snapdocs" & cleaned_data$Date == "2022-11-03"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "BitMEX" & cleaned_data$Date == "2022-11-02"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Brightline" & cleaned_data$Date == "2022-11-01"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Help Scout" & cleaned_data$Date == "2022-11-01"] <- 15
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Callisto Media" & cleaned_data$Date == "2022-10-25"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Volta" & cleaned_data$Date == "2022-10-21"] <- 170
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Roofstock" & cleaned_data$Date == "2022-10-20"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Starry" & cleaned_data$Date == "2022-10-20"] <- 508
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Collibra" & cleaned_data$Date == "2022-10-19"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Microsoft" & cleaned_data$Date == "2022-10-17"] <- 1000
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nuri" & cleaned_data$Date == "2022-10-17"] <- 215
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "ExtraHop" & cleaned_data$Date == "2022-10-13"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "GSR" & cleaned_data$Date == "2022-10-11"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "VanHack" & cleaned_data$Date == "2022-10-11"] <- 32
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Foresight Insurance" & cleaned_data$Date == "2022-10-06"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Spotify" & cleaned_data$Date == "2022-10-06"] <- 38
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "TwinStrand" & cleaned_data$Date == "2022-10-06"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Fivetran" & cleaned_data$Date == "2022-10-04"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Xendit" & cleaned_data$Date == "2022-10-04"] <- 45
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "ActiveCampaign" & cleaned_data$Date == "2022-10-03"] <- 135
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Tempo" & cleaned_data$Date == "2022-10-03"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Carsome" & cleaned_data$Date == "2022-09-30"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Truepill" & cleaned_data$Date == "2022-09-30"] <- 175
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Solarisbank" & cleaned_data$Date == "2022-09-29"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zenjob" & cleaned_data$Date == "2022-09-29"] <- 34
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Volta" & cleaned_data$Date == "2022-09-28"] <- 72
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Instacart" & cleaned_data$Date == "2022-09-24"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Made.com" & cleaned_data$Date == "2022-09-22"] <- 235
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ouster" & cleaned_data$Date == "2022-09-20"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "VideoAmp" & cleaned_data$Date == "2022-09-19"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Shopee" & cleaned_data$Date == "2022-09-18"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "FullStory" & cleaned_data$Date == "2022-09-13"] <- 72
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rent the Runway" & cleaned_data$Date == "2022-09-12"] <- 220
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sama" & cleaned_data$Date == "2022-09-12"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Amber Group" & cleaned_data$Date == "2022-09-09"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Capiter" & cleaned_data$Date == "2022-09-09"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "DreamBox Learning" & cleaned_data$Date == "2022-09-09"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Flowhub" & cleaned_data$Date == "2022-09-09"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "BigBear.ai" & cleaned_data$Date == "2022-09-08"] <- 46
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Medly" & cleaned_data$Date == "2022-09-07"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Juniper Square" & cleaned_data$Date == "2022-09-06"] <- 65
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Snagajob" & cleaned_data$Date == "2022-08-31"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Otonomo" & cleaned_data$Date == "2022-08-28"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Better.com" & cleaned_data$Date == "2022-08-26"] <- 250
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Better.com" & cleaned_data$Date == "2022-08-25"] <- 125
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "ShipBob" & cleaned_data$Date == "2022-08-25"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "DataRobot" & cleaned_data$Date == "2022-08-23"] <- 250
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Skillshare" & cleaned_data$Date == "2022-08-23"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mr. Yum" & cleaned_data$Date == "2022-08-22"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Thirty Madison" & cleaned_data$Date == "2022-08-18"] <- 42
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vendasta" & cleaned_data$Date == "2022-08-18"] <- 23
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Crypto.com" & cleaned_data$Date == "2022-08-16"] <- 800
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Snapdocs" & cleaned_data$Date == "2022-08-16"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Updater" & cleaned_data$Date == "2022-08-16"] <- 65
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "ThredUp" & cleaned_data$Date == "2022-08-15"] <- 134
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Almanac" & cleaned_data$Date == "2022-08-13"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Core Scientific" & cleaned_data$Date == "2022-08-12"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Orbit" & cleaned_data$Date == "2022-08-12"] <- 18
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Homeward" & cleaned_data$Date == "2022-08-10"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Berkeley Lights" & cleaned_data$Date == "2022-08-09"] <- 40
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Kaltura" & cleaned_data$Date == "2022-08-09"] <- 85
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Shift" & cleaned_data$Date == "2022-08-09"] <- 650
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sweetgreen" & cleaned_data$Date == "2022-08-09"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Daily Harvest" & cleaned_data$Date == "2022-08-08"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "DataRobot" & cleaned_data$Date == "2022-08-08"] <- 250
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Talkdesk" & cleaned_data$Date == "2022-08-05"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nomad" & cleaned_data$Date == "2022-08-04"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "StubHub" & cleaned_data$Date == "2022-08-04"] <- 161
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Weedmaps" & cleaned_data$Date == "2022-08-04"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zenius" & cleaned_data$Date == "2022-08-04"] <- 600
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Puppet" & cleaned_data$Date == "2022-08-03"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SoundCloud" & cleaned_data$Date == "2022-08-03"] <- 350
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Talkwalker" & cleaned_data$Date == "2022-08-03"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Butterfly Network" & cleaned_data$Date == "2022-08-02"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Classkick" & cleaned_data$Date == "2022-08-01"] <- 32
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "DeHaat" & cleaned_data$Date == "2022-08-01"] <- 500
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Gatherly" & cleaned_data$Date == "2022-07-31"] <- 7
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CoinFLEX" & cleaned_data$Date == "2022-07-29"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "2U" & cleaned_data$Date == "2022-07-28"] <- 800
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Bikayi" & cleaned_data$Date == "2022-07-28"] <- 300
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Change.org" & cleaned_data$Date == "2022-07-28"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Turntide" & cleaned_data$Date == "2022-07-28"] <- 130
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Included Health" & cleaned_data$Date == "2022-07-28"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Arete" & cleaned_data$Date == "2022-07-22"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Owlet" & cleaned_data$Date == "2022-07-22"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "People.ai" & cleaned_data$Date == "2022-07-22"] <- 22
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "98point6" & cleaned_data$Date == "2022-07-21"] <- 35
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "InVision" & cleaned_data$Date == "2022-07-21"] <- 400
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Smarsh" & cleaned_data$Date == "2022-07-21"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Capsule" & cleaned_data$Date == "2022-07-19"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Freshly" & cleaned_data$Date == "2022-07-18"] <- 48
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Hydrow" & cleaned_data$Date == "2022-07-18"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "TikTok" & cleaned_data$Date == "2022-07-18"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vimeo" & cleaned_data$Date == "2022-07-18"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Alto Pharmacy" & cleaned_data$Date == "2022-07-14"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "OpenSea" & cleaned_data$Date == "2022-07-14"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Arrival" & cleaned_data$Date == "2022-07-13"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Papa" & cleaned_data$Date == "2022-07-13"] <- 90
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Microsoft" & cleaned_data$Date == "2022-07-12"] <- 1500
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Forward" & cleaned_data$Date == "2022-07-11"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ignite" & cleaned_data$Date == "2022-07-11"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nextbite" & cleaned_data$Date == "2022-07-09"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "NextRoll" & cleaned_data$Date == "2022-07-08"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Cedar" & cleaned_data$Date == "2022-07-07"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Twitter" & cleaned_data$Date == "2022-07-07"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Motif Foodworks" & cleaned_data$Date == "2022-07-06"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "LetsGetChecked" & cleaned_data$Date == "2022-07-02"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zepto" & cleaned_data$Date == "2022-07-02"] <- 15
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Secfi" & cleaned_data$Date == "2022-06-30"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sundae" & cleaned_data$Date == "2022-06-30"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "CommentSold" & cleaned_data$Date == "2022-06-29"] <- 20
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Degreed" & cleaned_data$Date == "2022-06-29"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "HomeLight" & cleaned_data$Date == "2022-06-29"] <- 140
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Nova Benefits" & cleaned_data$Date == "2022-06-28"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Una Brands" & cleaned_data$Date == "2022-06-28"] <- 17
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Amount" & cleaned_data$Date == "2022-06-27"] <- 72
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Give Legacy" & cleaned_data$Date == "2022-06-24"] <- 13
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Esper" & cleaned_data$Date == "2022-06-23"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mark43" & cleaned_data$Date == "2022-06-23"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Orchard" & cleaned_data$Date == "2022-06-23"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ro" & cleaned_data$Date == "2022-06-23"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "StreamElements" & cleaned_data$Date == "2022-06-23"] <- 34
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Mindgeek" & cleaned_data$Date == "2022-06-22"] <- 125
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Frubana" & cleaned_data$Date == "2022-06-21"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Tray.io" & cleaned_data$Date == "2022-06-21"] <- 35
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Buzzer" & cleaned_data$Date == "2022-06-20"] <- 15
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Bybit" & cleaned_data$Date == "2022-06-20"] <- 500
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Circulo Health" & cleaned_data$Date == "2022-06-16"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Automox" & cleaned_data$Date == "2022-06-13"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Desktop Metal" & cleaned_data$Date == "2022-06-13"] <- 45
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Ziroom" & cleaned_data$Date == "2022-06-10"] <- 700
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Jellysmack" & cleaned_data$Date == "2022-06-09"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Starship" & cleaned_data$Date == "2022-06-09"] <- 70
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Trade Republic" & cleaned_data$Date == "2022-06-09"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Memmo" & cleaned_data$Date == "2022-06-08"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Clearco" & cleaned_data$Date == "2022-06-06"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sendoso" & cleaned_data$Date == "2022-06-06"] <- 100
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "5B Solar" & cleaned_data$Date == "2022-06-03"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Tesla" & cleaned_data$Date == "2022-06-03"] <- 200
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Rain" & cleaned_data$Date == "2022-06-02"] <- 25
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Side" & cleaned_data$Date == "2022-06-01"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Truck It In" & cleaned_data$Date == "2022-06-01"] <- 60
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Cerebral" & cleaned_data$Date == "2022-05-31"] <- 80
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Akerna" & cleaned_data$Date == "2022-05-27"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Terminus" & cleaned_data$Date == "2022-05-27"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Airlift" & cleaned_data$Date == "2022-05-25"] <- 400
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Getir" & cleaned_data$Date == "2022-05-25"] <- 4480
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Zapp" & cleaned_data$Date == "2022-05-25"] <- 75
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Olist" & cleaned_data$Date == "2022-05-23"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Thrasio" & cleaned_data$Date == "2022-05-02"] <- 220
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Better.com" & cleaned_data$Date == "2022-04-19"] <- 1350
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Automox" & cleaned_data$Date == "2022-04-18"] <- 37
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Grove Collaborative" & cleaned_data$Date == "2022-03-19"] <- 85
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Spin" & cleaned_data$Date == "2022-01-08"] <- 106
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "SumUp" & cleaned_data$Date == "2021-05-05"] <- 150
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "DJI" & cleaned_data$Date == "2021-02-24"] <- 120
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Scoop" & cleaned_data$Date == "2020-11-17"] <- 38
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "InVision" & cleaned_data$Date == "2020-08-14"] <- 50
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "The Appraisal Lane" & cleaned_data$Date == "2020-08-07"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Perkbox" & cleaned_data$Date == "2020-07-27"] <- 4
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Vox Media" & cleaned_data$Date == "2020-07-14"] <- 72
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Sprinklr" & cleaned_data$Date == "2020-06-25"] <- 30
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Conga" & cleaned_data$Date == "2020-06-15"] <- 44
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Petal" & cleaned_data$Date == "2020-05-12"] <- 10
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "AirMap" & cleaned_data$Date == "2020-04-30"] <- 28
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Clearbit" & cleaned_data$Date == "2020-04-22"] <- 12
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Grailed" & cleaned_data$Date == "2020-04-16"] <- 12
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Slice Labs" & cleaned_data$Date == "2020-04-08"] <- 28
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Pivot3" & cleaned_data$Date == "2020-03-27"] <- 250
+cleaned_data$Laid_Off_Count[cleaned_data$Company == "Eight Sleep" & cleaned_data$Date == "2020-03-23"] <- 75
+
+summary(cleaned_data)
+check_duplicate <- cleaned_data[duplicated(cleaned_data$Company) | duplicated(cleaned_data$Company, fromLast = TRUE), ]
+
+remove_rows <- c(1695, 417, 2557, 1811, 1041, 1885, 2496, 1194, 1101, 193, 2722, 1754, 1874)
+cleaned_data <- cleaned_data[!(row.names(cleaned_data) %in% remove_rows), ]
+
+cleaned_data$Company[cleaned_data$Company == "Bolt" & cleaned_data$Industry == "Finance"] <- "Bolt Finance"
+cleaned_data$Company[cleaned_data$Company == "Branch" & cleaned_data$Industry == "Finance"] <- "Branch Finance"
+
+cleaned_data$Date[cleaned_data$Company == "Sendy" & cleaned_data$Percentage == 0.2000] <- "2022-10-05"
+
+cleaned_data$Industry[cleaned_data$Industry == "Recruiting"] <- "HR"
+
+cleaned_data$Industry[cleaned_data$Company == "Carta"] <- "HR"
+cleaned_data$Industry[cleaned_data$Company == "Code42"] <- "Data"
+cleaned_data$Industry[cleaned_data$Company == "Cogito"] <- "Data"
+cleaned_data$Industry[cleaned_data$Company == "Domio"] <- "Travel"
+cleaned_data$Industry[cleaned_data$Company == "Glossier"] <- "Retail"
+cleaned_data$Industry[cleaned_data$Company == "HashiCorp"] <- "Infrastructure"
+cleaned_data$Industry[cleaned_data$Company == "Hubilo"] <- "Marketing"
+cleaned_data$Industry[cleaned_data$Company == "Noom"] <- "Healthcare"
+cleaned_data$Industry[cleaned_data$Company == "Nuri"] <- "Crypto"
+cleaned_data$Industry[cleaned_data$Company == "OneTrust"] <- "Security"
+cleaned_data$Industry[cleaned_data$Company == "PeerStreet"] <- "Real Estate"
+cleaned_data$Industry[cleaned_data$Company == "People.ai"] <- "Sales"
+cleaned_data$Industry[cleaned_data$Company == "Pollen"] <- "Travel"
+cleaned_data$Industry[cleaned_data$Company == "RingCentral"] <- "Other"
+cleaned_data$Industry[cleaned_data$Company == "ShareChat"] <- "Consumer"
+cleaned_data$Industry[cleaned_data$Company == "Wonder"] <- "Food"
+
+
+cleaned_data$Date <- as.Date(cleaned_data$Date, format = "%Y-%m-%d")
+cleaned_data$Month <- format(cleaned_data$Date, "%m")
+cleaned_data$Year <- format(cleaned_data$Date, "%Y")
+```
+
+
+
+Introduction {.storyboard}
+===========================================================
+
+
+### Overview
+
+The global business landscape has witnessed significant challenges over the past few years, especially with the onset of the COVID-19 pandemic. Many companies, particularly the technology companies, have faced the need to downsize their workforce or even file for bankruptcy due to the slowdown in the economy and border restrictions. Hence, this study aims to visualise the distribution of layoffs and bankruptcies of companies worldwide during the COVID-19 pandemic. 
+
+There are two objectives in this study, which are shown as follows,
+
+1. To visualise the distribution of layoffs of technology related companies across different countries worldwide and industries.
+2. To visualise the distribution of bankruptcies of technology related companies globally.
+
+
+
+### Raw Dataset
+
+```{r cahce = T, echo = F}
+library(DT)
+
+# create a data frame for the table describing the data set
+dataset_table <- data.frame(
+  Variable = c("Company", "Location_HQ", "Industry", "Laid_Off_Count", "Percentage",
+               "Date", "Source", "Funds_Raised", "Stage", "Date_Added", "Country",
+               "List_of_Employees_Laid_Off"),
+  Description = c("Name of the company",
+                  "Location of the company",
+                  "Type of industry the company is",
+                  "Total count",
+                  "Percentage of layoff",
+                  "Date of layoff",
+                  "Data gathered from source",
+                  "Total funds raised",
+                  "Stage funding of the company",
+                  "Data added in database",
+                  "Country of company located",
+                  "Link to google docs of employee list"
+                  )
+)
+
+# create the table
+datatable(dataset_table)
+```
+
+
+***
+
+This analysis explores a comprehensive dataset collected from [Kaggle 2023](https://www.kaggle.com/datasets/theakhilb/layoffs-data-2022), spanning from 11 March 2020 to 23 June 2023, focusing on companies that have experienced layoffs and bankruptcies. The raw dataset consists of 2738 observations and 12 variables. However, this dataset consists of a total of 2058 missing values, particularly there are 867 missing values in the Laid_Off_Count. To avoid data loss, data pre-processing like filling in the missing values has been done by searching for layoffs data through [TrueUp 2023](https://www.trueup.io/) and [LAYOFFS TRACKER 2023](https://layoffstracker.com/)
+
+After that, the dataset has been split into two, which are the layoff dataset and the bankruptcy dataset. 
+
+
+
+### Layoff Dataset
+```{r, cache = T, echo = F}
+layoff_data <- cleaned_data[!is.na(cleaned_data$Laid_Off_Count), ]
+layoff_data <- subset(layoff_data, select = -c(Percentage, Funds_Raised))
+str(layoff_data)
+```
+
+
+***
+
+The layoff dataset is used to visualise the distribution of layoffs. It consists of 2250 observations and nine variables. 
+
+
+
+
+
+### Bankruptcy Dataset
+```{r, cache = T, echo = F}
+bankrupt_data <- cleaned_data[cleaned_data$Percentage == 1.00, ]
+bankrupt_data <- subset(bankrupt_data, select = -c(Funds_Raised, Laid_Off_Count))
+bankrupt_data <- na.omit(bankrupt_data)
+str(bankrupt_data)
+```
+
+
+***
+
+On the other, the bankruptcy dataset is used to visualise the distribution of bankruptcy. It consists of 150 observations and nine variables.
+
+
+
+Visualisation {.storyboard}
+===========================================================
+
+### Frame 1
+```{r, cache = T, echo = F}
+library(ggplot2)
+library(tidyverse)
+
+total_layoff <- aggregate(Laid_Off_Count ~ Country, layoff_data, sum)
+coordinates <- read.csv("coordinates.csv", header = T, strip.white = T, encoding = "UTF-8")
+colnames(coordinates)[which(names(coordinates) == "country")] <- "Country"
+coordinates <- subset(coordinates, select = c(country_code, latitude, longitude, Country))
+df_plot1 <- merge(x = total_layoff, y = coordinates, by = "Country")
+
+# install.packages("countrycode")
+library(countrycode)
+
+# Create a mapping table from two-letter to three-letter country codes
+mapping_table <- data.frame(country_code = unique(df_plot1$country_code))
+mapping_table$iso3c <- countrycode(mapping_table$country_code, "iso2c", "iso3c")
+
+# Merge the mapping table with the df_plot1 data frame
+df_plot1 <- merge(df_plot1, mapping_table, by = "country_code", all.x = TRUE)
+
+library(plotly)
+map1 <- plot_ly(df_plot1, type = "choropleth", locations = df_plot1$iso3c, 
+                z = df_plot1$Laid_Off_Count, text = df_plot1$Country, 
+                colorscale = "Viridis")
+map1_custom <- list(showframe = F, showcoastlines = F, projection = list(type = "Mercator"))
+map1 <- map1 %>% colorbar(title = "Total Layoff") %>% 
+  layout(title = "<br>The distribution of layoff data around the world", geo = map1_custom)
+map1
+```
+
+
+***
+
+Frame 1 visualises the distribution of layoff data around the world. It is evident that the number of layoffs is higher in the United States, with nearly 35 thousand people have been fired.
+
+Besides that, India is the second highest country that experienced layoffs, with over 46 thousand people. Surprisingly, China, which has the highest population, has a lower number of layoffs than the United States and India, with approximately 10 thousand people.
+
+Source of coding: [Plotly 2023](https://plotly.com/r/choropleth-maps/)
+
+
+
+### Frame 2
+```{r, echo = F}
+# Third plot
+library(shiny)
+df_plot2 <- layoff_data %>% group_by(Year, Month) %>% summarise(Total_Layoff_Count = sum(Laid_Off_Count))
+years <- as.list(names(table(df_plot2$Year)))
+selectInput("years_option", label = "Select Year:", choices = years, selected = "2023")
+
+renderPlot({
+  year_data <- df_plot2[df_plot2$Year == input$years_option, ]
+      
+  ggplot(year_data, aes(x = factor(Month), y = Total_Layoff_Count, group = Year, color = factor(Year))) + 
+    geom_line() + labs(x = "Month", y = "Total Layoff") + theme(legend.position="none")
+}, width = 1000, height = 400)
+```
+
+
+***
+
+Frame 2 visualises the trends in worldwide layoffs from 2020 to 2023.  
+
+In 2020, the number of layoffs peaked in April, when most of countries had implemented the lockdown or movement control orders (MCO) measures to break the COVID-19 chains.
+
+In 2021, the number of layoffs peaked in January. Most workforce reduction cases happen during the end of the year and the beginning of the year. This is because the companies normally evaluate their yearly earnings during these few months.
+
+Similarly, the number of layoffs in 2022 and 2023 also reached the highest in November and January, respectively.
+
+
+
+### Frame 3
+```{r, echo = F, out.width = "50%"}
+library(wordcloud)
+library(RColorBrewer)
+library(gridExtra)
+df_plot3 <- layoff_data %>% group_by(Year, Industry) %>% summarise(Total_Layoff_Count = sum(Laid_Off_Count))
+
+subset_2020 <- df_plot3[df_plot3$Year == 2020, ]
+subset_2021 <- df_plot3[df_plot3$Year == 2021, ]
+subset_2022 <- df_plot3[df_plot3$Year == 2022, ]
+subset_2023 <- df_plot3[df_plot3$Year == 2023, ]
+
+plot_2020 <- wordcloud(subset_2020$Industry, subset_2020$Total_Layoff_Count, random.order = F, 
+                       colors = brewer.pal(8, "Dark2"), main = "Year 2020") 
+title("Year 2020")
+
+plot_2021 <- wordcloud(subset_2021$Industry, subset_2021$Total_Layoff_Count, random.order = F, 
+                       colors = brewer.pal(8, "Dark2"), main = "Year 2021")
+title("Year 2021")
+
+plot_2022 <- wordcloud(subset_2022$Industry, subset_2022$Total_Layoff_Count, random.order = F, 
+                       colors = brewer.pal(8, "Dark2"), main = "Year 2022")
+title("Year 2022")
+
+plot_2023 <- wordcloud(subset_2023$Industry, subset_2023$Total_Layoff_Count, random.order = F, 
+                       colors = brewer.pal(8, "Dark2"), main = "Year 2023")
+title("Year 2023")
+
+grid.arrange(plot_2020, plot_2021, plot_2022, plot_2023, ncol = 2)
+```
+
+
+***
+
+Frame 3 visualises the industries with the highest number of layoffs based on years.
+
+In 2020, industries like transportation and travel have the most number of layoffs. The workforce reduction is mainly due to the lockdown implementation and border closed. 
+
+In 2021 and 2022, the industries of consumer, retail, real estate, and food have the highest number of layoffs. This might be because consumers started to decrease their spending and consumption due to the increase in the products' price level. On the other hand, since consumption decreased and the earnings of the companies decreased, hence, there are more companies that cut off their employees number. 
+
+In contrast, many companies that come from different industries have laid off their employees in 2023, which can be observed from the biggest term "Other". 
+
+
+
+### Frame 4
+```{r, echo = F, out.width = "50%"}
+df_plot4 <- layoff_data[order(layoff_data$Company, layoff_data$Date), ]
+df_plot4 <- df_plot4[!duplicated(df_plot4$Company, fromLast = T), ]
+
+company_sizes <- vector("character", nrow(df_plot4))
+
+funding_size <- list("Seed" = "Small", "Series A" = "Small", "Series B" = "Small", "Series C" = "Medium", "Series D" = "Medium", "Series E" = "Medium", "Series F" = "Medium-Large", "Series G" = "Medium-Large", "Series H" = "Medium-Large", "Series I" = "Medium-Large", "Series J" = "Large", "Acquired" = "Large", "Post-IPO" = "Large", "Private Equity" = "Large", "Subsidiary" = "Large", "Unknown" = "Unknown")
+
+
+for(i in 1:nrow(df_plot4)){
+  company <- df_plot4$Company[i]
+  company_stage <- df_plot4[df_plot4$Company == company, ]
+  
+  if(nrow(company_stage) > 1){
+    most_recent_stage <- company_stage[1, ]
+    company_stage[i] <- funding_size[most_recent_stage$Stage]
+  }else{
+    company_sizes[i] <- funding_size[company_stage$Stage]
+  }
+}
+
+df_plot4$Company_Size <- company_sizes
+
+df_plot4$Company_Size <- unlist(df_plot4$Company_Size)
+
+new_df_plot4 <- aggregate(Laid_Off_Count ~ Company_Size, df_plot4, sum)
+
+par(mfrow = c(1, 2))
+
+ggplot(new_df_plot4, aes(x = Company_Size, y = Laid_Off_Count)) + geom_bar(stat = "identity", fill = "steelblue") + labs(x = "Company Size", y = "Total Layoff")
+
+min_value <- min(new_df_plot4$Laid_Off_Count)
+max_value <- max(new_df_plot4$Laid_Off_Count)
+new_df_plot4$Scaled_Laid_Off_Count <- (new_df_plot4$Laid_Off_Count - min_value) / (max_value - min_value)
+new_df_plot4$Scaled_Laid_Off_Count <- log(new_df_plot4$Laid_Off_Count)
+
+ggplot(new_df_plot4, aes(x = Company_Size, y = Scaled_Laid_Off_Count)) + geom_bar(stat = "identity", fill = "steelblue") + labs(x = "Company Size", y = "Total Layoff")
+```
+
+
+***
+
+Frame 4 visualises the layoffs by company size. The size of a company is justified based on its stage of funding. The categorisation does not according to the number of funds raised because the unit measurement of the currency is not consistent between companies. Small companies are those from funding stages of Seed, Series A, and Series B while medium companies are companies with funding stages of Series C, Series D, and Series E. In contrast, medium-large companies are companies with funding stages of Series F, G, H, and I while companies with funding stages of Series J, Acquired, Post-IPO, Private Equity, and Subsidiary are categorised as large companies. Companies with unspecified funding stages are classified as unknown. 
+
+The left side barplot shows the number of layoffs by company size without scaling while the right side barplot shows the number of layoffs by company size with scaling. Scaling is done because there is a significantly skewed distribution in the left side barplot. In general, large companies hire more employees in order to undergo their daily massive operations. Hence, it is common that big companies lay off more employees. 
+
+After scaling, the number of layoffs in large and medium companies, as well as the small and unknown companies is relatively the same. Surprisingly,  medium-large companies have the least number of layoffs than the others. 
+
+
+
+### Frame 5
+```{r, echo = F}
+df_plot5 <- df_plot4 %>% group_by(Company, Stage, Company_Size) %>% 
+  summarise(Total_Layoff_Count = sum(Laid_Off_Count)) %>% 
+  arrange(desc(Total_Layoff_Count)) %>% 
+  group_by(Company_Size) %>% 
+  top_n(n = 10, wt = Total_Layoff_Count) %>% ungroup()
+
+company_sizes <- as.list(names(table(df_plot5$Company_Size)))
+selectInput("comp_size_option", label = "Select Company Size:", choices = company_sizes, selected = "Large")
+
+renderPlot({
+  company_size_data <- df_plot5[df_plot5$Company_Size == input$comp_size_option, ]
+  
+  ggplot(company_size_data, aes(x = "", y = Total_Layoff_Count, fill = Company)) +
+    geom_bar(stat = "identity") +
+    coord_polar(theta = "y") +
+    geom_text(aes(label = paste0("Total layoff:\n", Total_Layoff_Count)), position = position_stack(vjust = 0.5))
+})
+```
+
+
+***
+
+Frame 5 visualises the top ten companies with the highest number of layoffs based on their funding stages.
+
+For large-sized companies, Google ranked as the highest layoff company among others. It is then followed by Meta, Amazon, Ericsson, Salesforce, Dell, Phillips, Cisco, IBM, Cerner, and SAP.
+
+For medium-large sized companies, Paisa Bazaar ranked as the highest layoff company, followed by Toast, Stripe, ShareChat, OYO, WeDoctor, Olive, Gojek, InVision, and Unacademy.
+
+For medium-sized companies, PuduTech has the most number of layoffs. This is then followed by Magic Leap, OneTrust, CureFit, GoMechanic, Deliv, Misfits Markets, Flexreport, MFine, and Gorillas.
+
+For small-sized companies, Butler Hospitality is ranked as the company that has the highest number of layoffs. This is then followed by Bitwise, 1K Kirana, Zenius, PhableCare, Avo, Airlift, Alerzo, Milkrun, and Oriente.
+
+For unknown-sized companies, Prosus and Katerra have the most significant number of layoffs than others.
+
+
+### Frame 6
+```{r, echo = F}
+df_plot6 <- layoff_data
+df_plot6$Period <- ifelse(layoff_data$Date < "2021-11-08", "Border Closed", "Border Reopened")
+
+output$violin_plot <- renderPlot({
+  ggplot(df_plot6, aes(x = Period, y = Laid_Off_Count, fill = Industry)) +
+    geom_violin() +
+    labs(x = "Period", y = ifelse(input$plot_type == "Scaled", "Scaled Layoff", "Layoff")) +
+    if (input$plot_type == "Scaled") {
+      scale_y_log10()
+    } else {
+      NULL
+    } +
+    theme_minimal()
+}, width = 1180, height = 400)
+
+radioButtons("plot_type", label = "Select Plot Type:",
+             choices = c("Non-scaled", "Scaled"), selected = "Non-scaled")
+
+plotOutput("violin_plot")
+```
+
+
+***
+
+Frame 6 visualises the layoffs and the periods of COVID-19. The time of the dataset is separated into two periods, namely "Border Closed" and "Border Reopened". The period of Border Closed is defined as the date before 08 November 2021 while the period of Border Reopened is defined as the date 08 November 2021 and onwards. The date is selected based on the border reopened of the United States for those with fully vaccinated [(NBC News 2021)](https://www.nbcnews.com/news/world/us-borders-reopen-many-vaccinated-international-travelers-rcna4794).
+
+It is observed that the violins of the period "Border Reopened are are narrower and taller, indicating that there is a narrower range and higher concentration of layoffs within that period. Consumer, media, retail, and real estate are particularly the industries that have the highest layoff after the border has reopened. 
+
+In contrast, the violins of Education, HR, and Support are wide and flat when the border is closed, suggesting that there is a higher variation and broader distribution of layoffs within these industries.
+
+
+
+### Frame 7
+```{r, echo = F}
+us_subset <- subset(layoff_data, Country == "United States")
+df_plot7 <- aggregate(Laid_Off_Count ~ Location_HQ, us_subset, sum)
+
+library(maps)
+states <- map_data("state")
+
+state_mapping <- c("Alamosa" = "colorado",
+                   "Albany" = "new york",
+                   "Ann Arbor" = "michigan",
+                   "Atlanta" = "georgia",
+                   "Austin" = "texas",
+                   "Baltimore" = "maryland",
+                   "Baton Rouge" = "louisiana",
+                   "Beijing" = "beijing",
+                   "Bend" = "oregon",
+                   "Berlin" = "berlin",
+                   "Birmingham" = "alabama",
+                   "Boise" = "idaho",
+                   "Boston" = "massachusetts",
+                   "Boulder" = "colorado",
+                   "Burlington" = "vermont",
+                   "Charleston" = "south carolina",
+                   "Charlotte" = "north carolina",
+                   "Charlottesville" = "virginia",
+                   "Chicago" = "illinois",
+                   "Cincinnati" = "ohio",
+                   "Cleveland" = "ohio",
+                   "Columbus" = "ohio",
+                   "Copenhagen" = "copenhagen",
+                   "Dallas" = "texas",
+                   "Davenport" = "iowa",
+                   "Denver" = "colorado",
+                   "Detroit" = "michigan",
+                   "Dover" = "delaware",
+                   "Dubai" = "dubai",
+                   "Durham" = "north carolina",
+                   "Eindhoven" = "eindhoven",
+                   "Grand Rapids" = "michigan",
+                   "Huntsville" = "alabama",
+                   "Indianapolis" = "indiana",
+                   "Kansas City" = "kansas",
+                   "Las Vegas" = "nevada",
+                   "Lehi" = "utah",
+                   "Lexington" = "kentucky",
+                   "Logan" = "utah",
+                   "London" = "london",
+                   "Los Angeles" = "california",
+                   "Louisville" = "kentucky",
+                   "Madison" = "wisconsin",
+                   "Melbourne" = "melbourne",
+                   "Mexico City" = "mexico",
+                   "Miami" = "florida",
+                   "Milwaukee" = "wisconsin",
+                   "Minneapolis" = "minnesota",
+                   "Missoula" = "montana",
+                   "Nashua" = "new hampshire",
+                   "Nashville" = "tennessee",
+                   "Nebraska City" = "nebraska",
+                   "New Delhi" = "new delhi",
+                   "New Haven" = "connecticut",
+                   "New York City" = "new york",
+                   "Orlando" = "florida",
+                   "Oxford" = "oxford",
+                   "Philadelphia" = "pennsylvania",
+                   "Phoenix" = "arizona",
+                   "Pittsburgh" = "pennsylvania",
+                   "Portland" = "oregon",
+                   "Providence" = "rhode island",
+                   "Raleigh" = "north carolina",
+                   "Reno" = "nevada",
+                   "Richmond" = "virginia",
+                   "Sacramento" = "california",
+                   "Salt Lake City" = "utah",
+                   "San Antonio" = "texas",
+                   "San Diego" = "california",
+                   "San Luis Obispo" = "california",
+                   "Santa Barbara" = "california",
+                   "Santa Fe" = "new mexico",
+                   "Sao Paulo" = "sao paulo",
+                   "Seattle" = "washington",
+                   "SF Bay Area" = "california",
+                   "Singapore" = "singapore",
+                   "Spokane" = "washington",
+                   "St. Louis" = "missouri",
+                   "Stamford" = "connecticut",
+                   "Stockholm" = "stockholm",
+                   "Sydney" = "sydney",
+                   "Tel Aviv" = "tel aviv",
+                   "Tokyo" = "tokyo",
+                   "Toronto" = "toronto",
+                   "Vancouver" = "vancouver",
+                   "Washington D.C." = "washington",
+                   "Wilmington" = "delaware"
+)
+
+colnames(df_plot7)[1] <- "Location_HQ"
+df_plot7$region <- state_mapping[df_plot7$Location_HQ]
+
+df_plot7 <- merge(df_plot7, states, by = "region")
+
+df_agg1 <- df_plot7 %>%
+  distinct(region, Laid_Off_Count, .keep_all = T) %>%
+  group_by(region) %>%
+  summarize(Laid_Off_Count = sum(Laid_Off_Count), long = mean(long), lat = mean(lat))
+
+map2 <- ggplot() +
+  geom_polygon(data = states, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = df_agg1, aes(x = long, y = lat, size = Laid_Off_Count, 
+                                color = Laid_Off_Count, 
+                                text = paste0(region, "<br>", "Layoff Count: ", Laid_Off_Count))) +
+  guides(title = "Total layoff") + labs(x = "Longitude", y = "Latitude")
+
+ggplotly(map2, tooltip = c("text"))
+```
+
+
+***
+
+Frame 7 visualises the layoffs in the United States. The selection of the United States is because it has the highest number of layoffs in the world. 
+
+It is observed that California has the highest number of layoffs. This might be because there are more technology companies located here, especially in Silicon Valley.
+
+
+
+### Frame 8
+```{r, echo = F}
+total_bankrupt <- aggregate(unique(Company) ~ Country, bankrupt_data, length)
+df_plot8 <- merge(x = total_bankrupt, y = coordinates, by = "Country")
+
+mapping_table <- data.frame(country_code = unique(df_plot8$country_code))
+mapping_table$iso3c <- countrycode(mapping_table$country_code, "iso2c", "iso3c")
+
+# Merge the mapping table with the df_plot1 data frame
+df_plot8 <- merge(df_plot8, mapping_table, by = "country_code", all.x = T)
+
+
+map3 <- plot_ly(df_plot8, type = "choropleth", locations = df_plot8$iso3c, 
+                z = df_plot8$`unique(Company)`, text = df_plot8$Country, 
+                colorscale = "Viridis")
+map3_custom <- list(showframe = F, showcoastlines = F, projection = list(type = "Mercator"))
+map3 <- map3 %>% colorbar(title = "Total Bankrupt") %>% 
+  layout(title = "<br>The distribution of bankrupt companies around the world", geo = map3_custom)
+map3
+```
+
+
+***
+
+Frame 8 visualises the distribution of bankruptcy around the world. 
+
+It is observed that the United States has the most technology-related companies that experienced bankruptcy. It is then followed by Australia and India, with 13 and 10 companies respectively.
+
+
+### Frame 9
+```{r, echo = F, out.width = "50%"}
+df_plot9 <- bankrupt_data %>% 
+  group_by(Year, Industry) %>% 
+  summarise(Total_Bankrupt_Count = n())
+
+subset_2020 <- df_plot9[df_plot9$Year == "2020", ]
+subset_2021 <- df_plot9[df_plot9$Year == "2021", ]
+subset_2022 <- df_plot9[df_plot9$Year == "2022", ]
+subset_2023 <- df_plot9[df_plot9$Year == "2023", ]
+
+plot_2020 <- wordcloud(subset_2020$Industry, subset_2020$Total_Bankrupt_Count, 
+                       random.order = F, colors = brewer.pal(8, "Dark2"), main = "Year 2020")
+title("Year 2020")
+
+plot_2021 <- wordcloud(subset_2021$Industry, subset_2021$Total_Bankrupt_Count, 
+                       random.order = F, colors = brewer.pal(8, "Dark2"), main = "Year 2021")
+title("Year 2021")
+
+plot_2022 <- wordcloud(subset_2022$Industry, subset_2022$Total_Bankrupt_Count, 
+                       random.order = F, colors = brewer.pal(8, "Dark2"), main = "Year 2022")
+title("Year 2022")
+
+plot_2023 <- wordcloud(subset_2023$Industry, subset_2023$Total_Bankrupt_Count, 
+                       random.order = F, colors = brewer.pal(8, "Dark2"), main = "Year 2023")
+title("Year 2023")
+
+library(gridExtra)
+grid.arrange(plot_2020, plot_2021, plot_2022, plot_2023, ncol = 2)
+```
+
+
+***
+
+Frame 9 visualises the industries with the highest number of bankruptcy from 2020 to 2023. 
+
+In 2020, there have more retail industry technology companies bankrupt. On the other hand, media and finance industry have the most number of companies bankrupt in 2021. 
+
+In 2022 and 2023, technology companies in the food industry experienced a shutdown due to a decrease in their delivery sales services and earnings. When the movement restriction has ended, more people are preferred to buy their groceries and foods offline. 
+
+
+
+### Frame 10
+```{r, echo = F}
+# Calculate total bankruptcies for each company size category
+company_sizes <- c("Small", "Medium", "Medium-Large", "Large", "Unknown")
+
+# Create a data frame to store the results
+df_plot10 <- data.frame(Company_Size = company_sizes, Total_Bankrupt_Count = 0)
+
+# Iterate over the company sizes and calculate the total bankruptcies
+for (size in company_sizes) {
+  # Subset the bankrupt data for the current company size
+  subset_data <- subset(bankrupt_data, Stage %in% names(funding_size) & funding_size[Stage] == size)
+  
+  # Count the number of unique companies for the current company size
+  total_count <- length(unique(subset_data$Company))
+  
+  # Update the total bankrupt count in the new data frame
+  df_plot10[df_plot10$Company_Size == size, "Total_Bankrupt_Count"] <- total_count
+}
+
+# Plot the bar chart
+ggplot(df_plot10, aes(x = Company_Size, y = Total_Bankrupt_Count, fill = Company_Size)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Company Size", y = "Total Bankrupt Count", title = "Company Size Distribution of Bankruptcies") +
+  scale_fill_manual(values = c("Small" = "steelblue", "Medium" = "darkorange", "Medium-Large" = "darkgreen", "Large" = "darkred", "Unknown" = "gray"),
+                    guide = guide_legend(title = "Company Size")) 
+```
+
+
+***
+
+Frame 10 visualises the distribution of bankruptcy by company size. 
+
+It is evident that smaller companies are more vulnerable to bankruptcy since they have higher chances of lacking operation funds. Surprisingly, none of the medium-large companies bankrupt during the pandemic periods.
+
+
+
+Conclusion {.storyboard}
+===========================================================
+
+### Summary
+
+In this study, the data on layoffs and bankruptcies are visualised to gain important information into the trends and patterns of workforce reductions and business failures. 
+
+The analysis revealed that layoffs have been prevalent across various industries and locations, indicating the impact of economic fluctuations, market conditions, and other factors on workforce reduction. Besides that, this study also identifies the industries that experienced higher layoff counts in order to have a further understanding of the sectors that are most affected by job losses.
+
+Furthermore, the analysis of bankruptcies offered valuable insights into the challenges faced by companies, including financial difficulty and market competition. The dataset facilitated the categorisation of bankruptcies based on different factors such as company size, industry, and funding stages. This helps to identify the specific segments of businesses that faced higher risks of failure.
+
+In summary, this analysis provides valuable insights into the dynamics of layoffs and bankruptcies. It is anticipated that if these visualisations could assist policymakers, investors, and stakeholders in making decisions.
